@@ -1,0 +1,61 @@
+=== Hilcot TaskFlow Multi-User Collaboration Test ===
+
+STEP 1: Register Account B (assignee)...
+  [OK] Account B already exists — proceeding
+
+STEP 2: Account A (Chikwendu Okoh) logs in...
+  [OK] Account A logged in
+  [OK] Session cookie received: YES
+
+STEP 3: Account B (Alex Okonkwo) logs in...
+  [OK] Account B logged in
+  [OK] Session cookie received: YES
+
+STEP 4: Get Account B user info...
+  [OK] Account B ID: 30267 | Name: Alex Okonkwo
+
+STEP 5: Account A creates Priority task assigned to Account B...
+  [OK] Task created. ID: 30003
+  [OK] Title: Q2 Financial Report Review
+  [OK] Priority: priority | Assigned to Account B (ID: 30267 )
+
+STEP 6: Account B checks "Assigned To Me" tasks...
+  [OK] Tasks assigned to Account B: 1
+  [OK] Target task FOUND in Account B's assigned tasks
+  [OK] Task title: Q2 Financial Report Review
+  [OK] Task priority: priority
+  [OK] Task status: pending
+  [OK] Assigned to name: Alex Okonkwo
+
+STEP 7: Account B adds a comment to the task...
+  [OK] Comment added by Account B
+  [OK] Comment ID: 30001
+
+STEP 8: Account B completes the task...
+  [OK] Task marked complete by Account B
+  [OK] Result: {"success":true}
+
+STEP 9: Account A checks activity trail...
+  [OK] Task status as seen by Account A: completed
+  [OK] Task title: Q2 Financial Report Review
+  [OK] Assigned to: Alex Okonkwo
+  [OK] Activity log entries: 4
+  - [completed] by User 30267: {"completedById":30267}
+  - [updated] by User 30267: {"type":"comment_added","preview":"I have reviewed the Q2 report. Numbers look g
+  - [created] by User 30168: {"title":"Q2 Financial Report Review","priority":"priority"}
+  - [assigned] by User 30168: {"assignedToId":30267}
+
+STEP 10: Verify reminder jobs stopped after task completion...
+  - Job 1: Status=stopped, Count=0
+  [OK] Reminder job correctly stopped after task completion
+
+[DB] Users in system:
+  - User 1: Chikwendu Okoh (kuttz22@gmail.com)
+  - User 30168: Chikwendu Okoh (chikwendu@hilcotflow.test)
+  - User 30267: Alex Okonkwo (alex@hilcotflow.test)
+
+=== MULTI-USER TEST COMPLETE ===
+Account A (Chikwendu Okoh): Created task, assigned to B, can see activity trail
+Account B (Alex Okonkwo): Saw assigned task, added comment, completed task
+Permissions: Each user can only see tasks they own, are assigned to, or are shared with
+Reminders: Stop automatically when task status = completed

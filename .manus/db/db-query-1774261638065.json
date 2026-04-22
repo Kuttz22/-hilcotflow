@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, name, email, role FROM users LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user p6Z2n7N6ySo8ndc.ea94f91c41b5 --database d74AX4oW8Fw8vpX3zNznBB --execute SELECT id, name, email, role FROM users LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Chikwendu Okoh",
+      "email": "kuttz22@gmail.com",
+      "role": "admin"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\n1\tChikwendu Okoh\tkuttz22@gmail.com\tadmin\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

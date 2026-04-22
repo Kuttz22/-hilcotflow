@@ -1,0 +1,39 @@
+import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'com.hilcot.taskflow',
+  appName: 'Hilcot TaskFlow',
+  webDir: 'dist/public',
+  server: {
+    // Point native WebView to the live production server.
+    // This ensures the native app loads the latest web assets and routes
+    // API calls correctly. The JS bundle also detects window.Capacitor
+    // and routes tRPC calls to https://hilcotflow.com automatically.
+    //  url: 'https://hilcotflow.com',
+    //  allowNavigation: ['hilcotflow.com', 'www.hilcotflow.com'],
+   cleartext: false,
+  },
+  plugins: {
+    PushNotifications: {
+      presentationOptions: ['badge', 'sound', 'alert'],
+    },
+    SplashScreen: {
+      launchShowDuration: 2000,
+      backgroundColor: '#0f172a',
+      androidSplashResourceName: 'splash',
+      androidScaleType: 'CENTER_CROP',
+      showSpinner: false,
+    },
+  },
+  ios: {
+    contentInset: 'automatic',
+    backgroundColor: '#0f172a',
+    preferredContentMode: 'mobile',
+  },
+  android: {
+    backgroundColor: '#0f172a',
+    allowMixedContent: false,
+  },
+};
+
+export default config;

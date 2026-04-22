@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1774260846149,
+      "tag": "0000_flat_magdalene",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1774260984329,
+      "tag": "0001_supreme_star_brand",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1774267971520,
+      "tag": "0002_hot_harpoon",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1774271984540,
+      "tag": "0003_smart_butterfly",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1774272722029,
+      "tag": "0004_breezy_vector",
+      "breakpoints": true
+    }
+  ]
+}

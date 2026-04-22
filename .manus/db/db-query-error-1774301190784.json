@@ -1,0 +1,8 @@
+{
+  "query": "SELECT id, email, name, password_hash IS NOT NULL as has_password FROM users ORDER BY id LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user p6Z2n7N6ySo8ndc.ea94f91c41b5 --database d74AX4oW8Fw8vpX3zNznBB --execute SELECT id, email, name, password_hash IS NOT NULL as has_password FROM users ORDER BY id LIMIT 10;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'password_hash' in 'field list'"
+  ]
+}

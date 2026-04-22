@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Hilcot TaskFlow</string>
+    <string name="title_activity_main">Hilcot TaskFlow</string>
+    <string name="package_name">com.hilcot.taskflow</string>
+    <string name="custom_url_scheme">com.hilcot.taskflow</string>
+</resources>

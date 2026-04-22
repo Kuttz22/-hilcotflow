@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `task_comments` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `taskId` int NOT NULL,\n  `userId` int NOT NULL,\n  `content` text NOT NULL,\n  `createdAt` timestamp NOT NULL DEFAULT (now()),\n  `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n  CONSTRAINT `task_comments_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user p6Z2n7N6ySo8ndc.ea94f91c41b5 --database d74AX4oW8Fw8vpX3zNznBB --execute CREATE TABLE `task_comments` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `taskId` int NOT NULL,\n  `userId` int NOT NULL,\n  `content` text NOT NULL,\n  `createdAt` timestamp NOT NULL DEFAULT (now()),\n  `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n  CONSTRAINT `task_comments_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 207
+}

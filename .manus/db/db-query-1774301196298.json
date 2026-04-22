@@ -1,0 +1,15 @@
+{
+  "query": "SELECT id, email, name FROM users ORDER BY id LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user p6Z2n7N6ySo8ndc.ea94f91c41b5 --database d74AX4oW8Fw8vpX3zNznBB --execute SELECT id, email, name FROM users ORDER BY id LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "email": "kuttz22@gmail.com",
+      "name": "Chikwendu Okoh"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\temail\tname\n1\tkuttz22@gmail.com\tChikwendu Okoh\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}
