@@ -33,7 +33,9 @@ async function startServer() {
   const app = express();
 
 app.use(cors({
-  origin: true,
+  origin: [
+    "https://hilcotflow-14db-995iw8hia-chikwendu-okohs-projects.vercel.app"
+  ],
   credentials: true,
 }));
 
