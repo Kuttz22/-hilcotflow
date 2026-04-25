@@ -44,5 +44,6 @@ export function getSessionCookieOptions(
     path: "/",
     sameSite: "none",
     secure: true,
+    domain: undefined,
   };
 }
