@@ -38,6 +38,7 @@ app.use(cors({
     "https://hilcotflow-14db-995iw8hia-chikwendu-okohs-projects.vercel.app"
   ],
   credentials: true,
+  methods: ["GET", "POST", "OPTIONS"],
 }));
 
 app.use(cookieParser());
