@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
-import { COOKIE_NAME } from "@shared/const";
+import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
@@ -127,12 +127,13 @@ export const appRouter = router({
         }
         // Issue a session cookie using the same mechanism as OAuth
         const { sdk } = await import("./_core/sdk");
-        const token = await sdk.createSessionToken(user.openId, { name: user.name ?? "" });
+        const token = await sdk.createSessionToken(user.openId ?? `email:${user.email}`, { name: user.name ?? "" });
         ctx.res.cookie(COOKIE_NAME, token, {
         httpOnly: true,
         secure: true,
         sameSite: "none",
         path: "/",
+        maxAge: ONE_YEAR_MS,
   });
         return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
       }),
