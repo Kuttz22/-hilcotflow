@@ -41,7 +41,7 @@ app.use(cors({
   methods: ["GET", "POST", "OPTIONS"],
 }));
 
-app.use(cookieParser());
+app.use(cookieParser(process.env.JWT_SECRET));
   const server = createServer(app);
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
