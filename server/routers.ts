@@ -97,6 +97,8 @@ export const appRouter = router({
           name: input.name,
           email: input.email,
           passwordHash,
+          openId: `email:${input.email}`,
+          loginMethod: "password",
         });
         if (!user) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
         return { success: true, userId: user.id };
