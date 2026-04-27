@@ -129,7 +129,10 @@ export const appRouter = router({
         }
         // Issue a session cookie using the same mechanism as OAuth
         const { sdk } = await import("./_core/sdk");
-        const token = await sdk.createSessionToken(user.openId ?? `email:${user.email}`, { name: user.name ?? "" });
+        const token = await sdk.createSessionToken(user.openId ?? `email:${user.email}`, {
+        appId: "hilcotflow",
+        name: user.name ?? "",
+        });
         ctx.res.cookie(COOKIE_NAME, token, {
         httpOnly: true,
         secure: true,
