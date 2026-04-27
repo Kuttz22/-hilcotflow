@@ -35,7 +35,8 @@ async function startServer() {
 
 app.use(cors({
   origin: [
-    "https://hilcotflow-14db-995iw8hia-chikwendu-okohs-projects.vercel.app"
+    "https://hilcotflow-14db-995iw8hia-chikwendu-okohs-projects.vercel.app",
+    "https://hilcotflow-production.up.railway.app"
   ],
   credentials: true,
   methods: ["GET", "POST", "OPTIONS"],
