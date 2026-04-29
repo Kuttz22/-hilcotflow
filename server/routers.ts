@@ -136,7 +136,7 @@ export const appRouter = router({
         ctx.res.cookie(COOKIE_NAME, token, {
         httpOnly: true,
         secure: true,
-        sameSite: "none",
+        sameSite: "lax",
         path: "/",
         maxAge: ONE_YEAR_MS,
   });
