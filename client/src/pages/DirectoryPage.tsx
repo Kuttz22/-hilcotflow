@@ -74,7 +74,6 @@ import {
   Heart,
   Star,
   UserCog,
-  Link2,
 } from "lucide-react";
 import { getInitials } from "@/lib/taskUtils";
 import { ProfileDrawer, type ProfileContact } from "@/components/ProfileDrawer";
@@ -123,7 +122,7 @@ type Invitation = {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const DEFAULT_CATEGORIES = ["Family", "Friends", "Business", "Assistants"];
-const CREATE_NEW_SENTINEL = "__create_new__";
+const CREATE_NEW_WS_SENTINEL = "__create_new_ws__";
 
 const ROLE_META: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   admin: {
@@ -275,31 +274,6 @@ function AddContactModal({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [category, setCategory] = useState("Friends");
-  const [customCategories, setCustomCategories] = useState<string[]>([]);
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
-
-  const allCategories = [...DEFAULT_CATEGORIES, ...customCategories];
-
-  const handleCategoryChange = (value: string) => {
-    if (value === CREATE_NEW_SENTINEL) {
-      setShowNewCategoryInput(true);
-    } else {
-      setCategory(value);
-      setShowNewCategoryInput(false);
-    }
-  };
-
-  const handleSaveNewCategory = () => {
-    const trimmed = newCategoryName.trim();
-    if (!trimmed) return;
-    if (!allCategories.includes(trimmed)) {
-      setCustomCategories((prev) => [...prev, trimmed]);
-    }
-    setCategory(trimmed);
-    setNewCategoryName("");
-    setShowNewCategoryInput(false);
-  };
 
   const { data: allUsers = [] } = trpc.users.list.useQuery();
 
@@ -322,8 +296,6 @@ function AddContactModal({
     setEmail("");
     setPhone("");
     setCategory("Friends");
-    setNewCategoryName("");
-    setShowNewCategoryInput(false);
     onClose();
   };
 
@@ -389,51 +361,16 @@ function AddContactModal({
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-medium">Category <span className="text-destructive">*</span></label>
-            <Select value={showNewCategoryInput ? CREATE_NEW_SENTINEL : category} onValueChange={handleCategoryChange}>
+            <Select value={category} onValueChange={setCategory}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a category" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {allCategories.map((c) => (
+                {DEFAULT_CATEGORIES.map((c) => (
                   <SelectItem key={c} value={c}>{c}</SelectItem>
                 ))}
-                <Separator className="my-1" />
-                <SelectItem value={CREATE_NEW_SENTINEL} className="text-primary font-medium">
-                  + Create new category…
-                </SelectItem>
               </SelectContent>
             </Select>
-
-            {/* Inline new-category input — shown when "Create new category…" is selected */}
-            {showNewCategoryInput && (
-              <div className="flex gap-2 mt-1.5">
-                <Input
-                  placeholder="New category name"
-                  value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSaveNewCategory()}
-                  autoFocus
-                  className="h-8 text-sm"
-                />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8 px-3 shrink-0"
-                  onClick={handleSaveNewCategory}
-                  disabled={!newCategoryName.trim()}
-                >
-                  <Check className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-8 px-2 shrink-0"
-                  onClick={() => { setShowNewCategoryInput(false); setNewCategoryName(""); }}
-                >
-                  <XCircle className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            )}
           </div>
         </div>
 
@@ -453,8 +390,7 @@ function AddContactModal({
 
 // ─── Create Workspace Modal ───────────────────────────────────────────────────
 
-const WORKSPACE_TYPES = ["Personal", "Team", "Organization", "Family", "Custom"] as const;
-type WorkspaceTypeOption = (typeof WORKSPACE_TYPES)[number];
+const WORKSPACE_TYPES = ["Personal", "Organization", "Hospital", "Family", "Team"];
 
 function CreateWorkspaceModal({
   open,
@@ -466,13 +402,8 @@ function CreateWorkspaceModal({
   const utils = trpc.useUtils();
   const { refetch } = useWorkspace();
   const [name, setName] = useState("");
-  const [type, setType] = useState<WorkspaceTypeOption>("Team");
-  const [customType, setCustomType] = useState("");
-  const [saveAsCategory, setSaveAsCategory] = useState(false);
+  const [type, setType] = useState("Team");
   const [description, setDescription] = useState("");
-
-  const isCustom = type === "Custom";
-  const effectiveType = isCustom ? (customType.trim() || "Custom") : type;
 
   const createWorkspace = trpc.workspaces.create.useMutation({
     onSuccess: () => {
@@ -487,20 +418,16 @@ function CreateWorkspaceModal({
   const handleClose = () => {
     setName("");
     setType("Team");
-    setCustomType("");
-    setSaveAsCategory(false);
     setDescription("");
     onClose();
   };
 
   const handleSubmit = () => {
     if (!name.trim()) return;
-    if (isCustom && !customType.trim()) return;
     createWorkspace.mutate({
       name: name.trim(),
       description: description.trim() || undefined,
     });
-    // Future: if saveAsCategory && isCustom, persist customType as a reusable category
   };
 
   return (
@@ -529,7 +456,7 @@ function CreateWorkspaceModal({
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-medium">Workspace Type <span className="text-destructive">*</span></label>
-            <Select value={type} onValueChange={(v) => setType(v as WorkspaceTypeOption)}>
+            <Select value={type} onValueChange={setType}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -540,33 +467,6 @@ function CreateWorkspaceModal({
               </SelectContent>
             </Select>
           </div>
-
-          {/* Custom Workspace Type — only shown when Custom is selected */}
-          {isCustom && (
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">
-                Custom Workspace Type <span className="text-destructive">*</span>
-              </label>
-              <Input
-                placeholder="e.g. Studio, Clinic, NGO…"
-                value={customType}
-                onChange={(e) => setCustomType(e.target.value)}
-                autoFocus
-              />
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  id="save-as-category"
-                  type="checkbox"
-                  checked={saveAsCategory}
-                  onChange={(e) => setSaveAsCategory(e.target.checked)}
-                  className="h-3.5 w-3.5 accent-primary"
-                />
-                <label htmlFor="save-as-category" className="text-xs text-muted-foreground cursor-pointer select-none">
-                  Save as reusable category
-                </label>
-              </div>
-            </div>
-          )}
           <div className="space-y-1.5">
             <label className="text-sm font-medium">Description (optional)</label>
             <Textarea
@@ -583,7 +483,7 @@ function CreateWorkspaceModal({
           <Button variant="outline" onClick={handleClose}>Cancel</Button>
           <Button
             onClick={handleSubmit}
-            disabled={!name.trim() || (isCustom && !customType.trim()) || createWorkspace.isPending}
+            disabled={!name.trim() || createWorkspace.isPending}
           >
             {createWorkspace.isPending ? "Creating…" : "Create Workspace"}
           </Button>
@@ -607,7 +507,7 @@ function InviteModal({
   activeWorkspace: WorkspaceSummary | null;
 }) {
   const utils = trpc.useUtils();
-  const { workspaces } = useWorkspace();
+  const { workspaces, refetch: refetchWorkspaces } = useWorkspace();
   const [email, setEmail] = useState("");
   const [workspaceId, setWorkspaceId] = useState<string>(
     activeWorkspace ? String(activeWorkspace.id) : "personal"
@@ -616,8 +516,43 @@ function InviteModal({
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const isWorkspaceInvite = workspaceId !== "personal";
+  // Inline create-workspace state
+  const [showNewWsInput, setShowNewWsInput] = useState(false);
+  const [newWsName, setNewWsName] = useState("");
+
+  const isWorkspaceInvite = workspaceId !== "personal" && workspaceId !== CREATE_NEW_WS_SENTINEL;
   const selectedWorkspace = workspaces.find((w) => String(w.id) === workspaceId);
+
+  // Inline workspace creation
+  const createWorkspaceInline = trpc.workspaces.create.useMutation({
+    onSuccess: (newWs) => {
+      utils.workspaces.list.invalidate();
+      refetchWorkspaces();
+      setWorkspaceId(String(newWs.id));
+      setShowNewWsInput(false);
+      // capture the name before clearing state
+      const createdName = newWsName.trim();
+      setNewWsName("");
+      toast.success("Workspace created", { description: `"${createdName}" is ready and selected.` });
+    },
+    onError: (err) => toast.error("Failed to create workspace", { description: err.message }),
+  });
+
+  const handleWorkspaceChange = (value: string) => {
+    if (value === CREATE_NEW_WS_SENTINEL) {
+      setShowNewWsInput(true);
+    } else {
+      setWorkspaceId(value);
+      setShowNewWsInput(false);
+      setNewWsName("");
+    }
+  };
+
+  const handleSaveNewWs = () => {
+    const trimmed = newWsName.trim();
+    if (!trimmed) return;
+    createWorkspaceInline.mutate({ name: trimmed });
+  };
 
   // Personal invite
   const sendPersonalInvite = trpc.invitations.send.useMutation({
@@ -637,28 +572,6 @@ function InviteModal({
     },
     onError: (err) => toast.error("Failed to send invitation", { description: err.message }),
   });
-
-  // Link-based invite (no email required)
-  const [linkCopied, setLinkCopied] = useState(false);
-  const createInviteLink = trpc.workspaces.invitations.createLink.useMutation({
-    onSuccess: (data) => {
-      navigator.clipboard.writeText(data.inviteUrl).then(() => {
-        setLinkCopied(true);
-        toast.success("Invite link copied!", { description: "Share this link to invite someone to the workspace." });
-        setTimeout(() => setLinkCopied(false), 3000);
-      });
-    },
-    onError: (err) => toast.error("Failed to create invite link", { description: err.message }),
-  });
-
-  const handleCopyLink = () => {
-    if (!selectedWorkspace) return;
-    createInviteLink.mutate({
-      workspaceId: selectedWorkspace.id,
-      role,
-      origin: window.location.origin,
-    });
-  };
 
   const isPending = sendPersonalInvite.isPending || sendWorkspaceInvite.isPending;
 
@@ -692,6 +605,8 @@ function InviteModal({
     setRole("member");
     setInviteUrl(null);
     setCopied(false);
+    setShowNewWsInput(false);
+    setNewWsName("");
     onClose();
   };
 
@@ -722,8 +637,11 @@ function InviteModal({
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Invite to</label>
-              <Select value={workspaceId} onValueChange={setWorkspaceId}>
+              <label className="text-sm font-medium">Invite to workspace</label>
+              <Select
+                value={showNewWsInput ? CREATE_NEW_WS_SENTINEL : workspaceId}
+                onValueChange={handleWorkspaceChange}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -732,8 +650,48 @@ function InviteModal({
                   {workspaces.map((w) => (
                     <SelectItem key={w.id} value={String(w.id)}>{w.name}</SelectItem>
                   ))}
+                  <Separator className="my-1" />
+                  <SelectItem value={CREATE_NEW_WS_SENTINEL} className="text-primary font-medium">
+                    + Create new workspace
+                  </SelectItem>
                 </SelectContent>
               </Select>
+
+              {/* Inline new-workspace input */}
+              {showNewWsInput && (
+                <div className="flex gap-2 mt-1.5">
+                  <Input
+                    placeholder="Workspace name"
+                    value={newWsName}
+                    onChange={(e) => setNewWsName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSaveNewWs()}
+                    autoFocus
+                    className="h-8 text-sm"
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 px-3 shrink-0"
+                    onClick={handleSaveNewWs}
+                    disabled={!newWsName.trim() || createWorkspaceInline.isPending}
+                  >
+                    {createWorkspaceInline.isPending ? (
+                      <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : (
+                      <Check className="h-3.5 w-3.5" />
+                    )}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 px-2 shrink-0"
+                    onClick={() => { setShowNewWsInput(false); setNewWsName(""); }}
+                    disabled={createWorkspaceInline.isPending}
+                  >
+                    <XCircle className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              )}
             </div>
             {isWorkspaceInvite && (
               <div className="space-y-1.5">
@@ -777,20 +735,6 @@ function InviteModal({
           {!inviteUrl ? (
             <>
               <Button variant="outline" onClick={handleClose}>Cancel</Button>
-              {isWorkspaceInvite && selectedWorkspace && (
-                <Button
-                  variant="outline"
-                  onClick={handleCopyLink}
-                  disabled={createInviteLink.isPending}
-                  title="Copy a shareable invite link (no email needed)"
-                >
-                  {linkCopied ? (
-                    <><Check className="mr-1.5 h-4 w-4" /> Copied!</>
-                  ) : (
-                    <><Link2 className="mr-1.5 h-4 w-4" /> Copy Invite Link</>
-                  )}
-                </Button>
-              )}
               <Button onClick={handleSend} disabled={!email.trim() || isPending}>
                 {isPending ? "Sending…" : "Send Invitation"}
               </Button>
@@ -934,22 +878,13 @@ function WorkspaceTab({
   const { user } = useAuth();
   const [roleFilter, setRoleFilter] = useState<string>("all");
 
-  // Safe workspace ID — avoids the "null is not an object (evaluating 'r.id')" crash
-  // on native iOS where the context may not be hydrated before the first render.
-  const workspaceId = activeWorkspace?.id ?? 0;
-
-  const { data: rawMembers = [], isLoading } = trpc.workspaces.members.list.useQuery(
-    { workspaceId },
-    { enabled: !!activeWorkspace && workspaceId > 0 }
-  );
-
-  // Normalise: filter out any null/undefined rows or rows missing userId
-  const members: WorkspaceMember[] = (rawMembers as WorkspaceMember[]).filter(
-    (m): m is WorkspaceMember => !!m && typeof m.userId === "number"
+  const { data: members = [], isLoading } = trpc.workspaces.members.list.useQuery(
+    { workspaceId: activeWorkspace!.id },
+    { enabled: !!activeWorkspace }
   );
 
   const filtered = useMemo(() => {
-    let result = members;
+    let result = members as WorkspaceMember[];
     if (roleFilter !== "all") result = result.filter((m) => m.role === roleFilter);
     if (search) {
       const q = search.toLowerCase();
@@ -1025,12 +960,12 @@ function WorkspaceTab({
           icon={Users}
           title="No members found"
           description={
-            members.length === 0
+            (members as WorkspaceMember[]).length === 0
               ? "Invite your team to start collaborating."
               : "No members match your current filter."
           }
           action={
-            isAdmin && members.length === 0 ? (
+            isAdmin && (members as WorkspaceMember[]).length === 0 ? (
               <Button onClick={onInvite}>
                 <UserPlus className="h-4 w-4 mr-2" />
                 Invite your team
@@ -1041,7 +976,6 @@ function WorkspaceTab({
       ) : (
         <div className="space-y-2">
           {filtered.map((member) => {
-            if (!member || typeof member.userId !== "number") return null;
             const meta = ROLE_META[member.role] ?? ROLE_META.member;
             return (
               <PersonRow
