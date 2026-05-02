@@ -74,6 +74,7 @@ import {
   Heart,
   Star,
   UserCog,
+  Link2,
 } from "lucide-react";
 import { getInitials } from "@/lib/taskUtils";
 import { ProfileDrawer, type ProfileContact } from "@/components/ProfileDrawer";
@@ -564,6 +565,40 @@ function InviteModal({
     onError: (err) => toast.error("Failed to send invitation", { description: err.message }),
   });
 
+  // Generate shareable invite link (no email required)
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [generatingLink, setGeneratingLink] = useState(false);
+
+  const createInviteLink = trpc.workspaces.invitations.createLink.useMutation({
+    onSuccess: (data) => {
+      navigator.clipboard.writeText(data.inviteUrl).then(() => {
+        setLinkCopied(true);
+        setTimeout(() => setLinkCopied(false), 2500);
+        toast.success("Invite link copied!", {
+          description: "Share this link with anyone you want to invite.",
+        });
+      });
+      setGeneratingLink(false);
+    },
+    onError: (err) => {
+      setGeneratingLink(false);
+      toast.error("Failed to generate invite link", { description: err.message });
+    },
+  });
+
+  const handleCopyLink = () => {
+    if (!isWorkspaceInvite || !selectedWorkspace) {
+      toast.error("Select a workspace first to generate an invite link");
+      return;
+    }
+    setGeneratingLink(true);
+    createInviteLink.mutate({
+      workspaceId: selectedWorkspace.id,
+      role,
+      origin: window.location.origin,
+    });
+  };
+
   // Workspace invite
   const sendWorkspaceInvite = trpc.workspaces.invitations.send.useMutation({
     onSuccess: (data) => {
@@ -605,6 +640,8 @@ function InviteModal({
     setRole("member");
     setInviteUrl(null);
     setCopied(false);
+    setLinkCopied(false);
+    setGeneratingLink(false);
     setShowNewWsInput(false);
     setNewWsName("");
     onClose();
@@ -731,10 +768,28 @@ function InviteModal({
           </div>
         )}
 
-        <DialogFooter>
+        <DialogFooter className="flex-col sm:flex-row gap-2">
           {!inviteUrl ? (
             <>
-              <Button variant="outline" onClick={handleClose}>Cancel</Button>
+              <Button variant="outline" onClick={handleClose} className="sm:mr-auto">Cancel</Button>
+              {/* Copy Invite Link — workspace only, no email required */}
+              {isWorkspaceInvite && (
+                <Button
+                  variant="outline"
+                  onClick={handleCopyLink}
+                  disabled={generatingLink || createInviteLink.isPending}
+                  className="gap-1.5"
+                >
+                  {generatingLink || createInviteLink.isPending ? (
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  ) : linkCopied ? (
+                    <Check className="h-3.5 w-3.5 text-green-500" />
+                  ) : (
+                    <Link2 className="h-3.5 w-3.5" />
+                  )}
+                  {linkCopied ? "Copied!" : "Copy Invite Link"}
+                </Button>
+              )}
               <Button onClick={handleSend} disabled={!email.trim() || isPending}>
                 {isPending ? "Sending…" : "Send Invitation"}
               </Button>
@@ -878,9 +933,13 @@ function WorkspaceTab({
   const { user } = useAuth();
   const [roleFilter, setRoleFilter] = useState<string>("all");
 
+  // Safe workspace ID — prevents "Cannot read properties of null (reading 'id')" crash
+  // when activeWorkspace is null on first render before the context hydrates.
+  const safeWorkspaceId = activeWorkspace?.id ?? 0;
+
   const { data: members = [], isLoading } = trpc.workspaces.members.list.useQuery(
-    { workspaceId: activeWorkspace!.id },
-    { enabled: !!activeWorkspace }
+    { workspaceId: safeWorkspaceId },
+    { enabled: !!activeWorkspace && safeWorkspaceId > 0 }
   );
 
   const filtered = useMemo(() => {
@@ -1342,7 +1401,7 @@ function WorkspaceSwitcher({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function DirectoryPage() {
-  const { workspaces, activeWorkspace, setActiveWorkspace } = useWorkspace();
+  const { workspaces, activeWorkspace, setActiveWorkspace, isLoading: workspacesLoading } = useWorkspace();
   const [showAddContact, setShowAddContact] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [showCreateWorkspace, setShowCreateWorkspace] = useState(false);
@@ -1438,6 +1497,9 @@ export default function DirectoryPage() {
           </TabsContent>
 
           <TabsContent value="workspace" className="flex-1 mt-0">
+            {workspacesLoading ? (
+              <RowSkeleton count={3} />
+            ) : (
             <WorkspaceTab
               activeWorkspace={activeWorkspace}
               search={search}
@@ -1450,6 +1512,7 @@ export default function DirectoryPage() {
                 workspaceRole: m.role,
               })}
             />
+            )}
           </TabsContent>
 
           <TabsContent value="invites" className="flex-1 mt-0">
